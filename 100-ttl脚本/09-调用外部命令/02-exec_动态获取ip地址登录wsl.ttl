@@ -6,8 +6,11 @@ PASSWORD = 'apluser'
 ; 创建保存wsl的ip地址的文件路径
 call create_save_wsl_ip_address_temp_filepath
 
-; 获取wsl的ip地址
-call get_wsl_ip_address
+; 创建存储wsl的ip地址的临时文件
+call create_wsl_ip_address_temp_file
+
+; 读取wsl的ip地址到变量中
+call read_wsl_ip_address_to_var
 
 ;=====================================================================
 ; 开启wsl中的ssh服务
@@ -43,19 +46,30 @@ end
     sprintf2 tmp_wsl_ip_address_full_temp_path '%s\%s' tmp_folder_path tmp_wsl_ip_address_name
 return
 
-; 获取wsl的ip地址
-:get_wsl_ip_address
+; 创建存储wsl的ip地址的临时文件
+:create_wsl_ip_address_temp_file
 
     ; 动态获取wsl的ip地址
     ; 注意, 生成的纯文本不能有BOM,
     ;       否则在读取第一行的时候, 会把BOM字符也给读进去
-    ; powershell5生成的文件, 默认自带BOM
+    ; 1. powershell5生成的文件, 默认自带BOM, powershell5 不支持 utf8NoBOM
     ; sprintf2 get_wsl_ip_cmd 'powershell -NoProfile -Command "(wsl -d %s -e hostname -I).Trim() | Out-File -FilePath ''%s'' -Encoding utf8"' WSL_NAME tmp_wsl_ip_address_full_temp_path
+    ; 2. 使用powershell7生成的文件可以使用无BOM
+    ; sprintf2 get_wsl_ip_cmd 'pwsh -NoProfile -Command "(wsl -d %s -e hostname -I).Trim() | Out-File -FilePath ''%s'' -Encoding utf8NoBOM"' WSL_NAME tmp_wsl_ip_address_full_temp_path
 
-    ; 使用powershell7生成的文件可以使用无BOM
-    sprintf2 get_wsl_ip_cmd 'pwsh -NoProfile -Command "(wsl -d %s -e hostname -I).Trim() | Out-File -FilePath ''%s'' -Encoding utf8NoBOM"' WSL_NAME tmp_wsl_ip_address_full_temp_path
+    ; 获取当前ttl脚本的文件夹
+    getdir ttl_folder_path
+    ; 拼接powershell脚本所在的绝对路径
+    sprintf2 ps_file_path '%s\%s' ttl_folder_path '02-get_wsl_ip_address.ps1'
+
+    ; 指定powershell脚本, 获取wsl的ip地址, 并把ip地址存储到临时路径中
+    sprintf2 get_wsl_ip_cmd 'powershell -NoProfile -ExecutionPolicy RemoteSigned -File "%s" -WSL_NAME "%s" -tmp_wsl_ip_address_full_temp_path "%s"' ps_file_path WSL_NAME tmp_wsl_ip_address_full_temp_path
     exec get_wsl_ip_cmd 'hide' 1
 
+return
+
+; 读取wsl的ip地址到变量中
+:read_wsl_ip_address_to_var
     ; 指针在文件开头
     ; 只读模式打开文件
     fileopen wsl_ip_address_handle tmp_wsl_ip_address_full_temp_path 0 1
@@ -69,5 +83,4 @@ return
 
     ; 删除临时存放wsl的ip地址的文件
     filedelete tmp_wsl_ip_address_full_temp_path
-
 return
