@@ -1,0 +1,73 @@
+; 定义连接服务器的变量参数
+WSL_NAME = 'Ubuntu_22.04'
+USERNAME = 'apluser'
+PASSWORD = 'apluser'
+
+; 创建保存wsl的ip地址的文件路径
+call create_save_wsl_ip_address_temp_filepath
+
+; 获取wsl的ip地址
+call get_wsl_ip_address
+
+;=====================================================================
+; 开启wsl中的ssh服务
+;   "hide"
+;       执行时隐藏窗口
+;   1
+;       启动中的程序执行完毕之前, 等待
+;       程序启动完毕之后, 会把结束code保存到系统变量result中
+;=====================================================================
+sprintf2 start_wsl_ssh "wsl -d %s -- sudo service ssh start" WSL_NAME
+exec start_wsl_ssh 'hide' 1
+
+; 格式化连接服务器的命令
+sprintf2 COMMAND "%s:22 /ssh /2 /auth=password /user=%s /passwd=%s" HOSTADDR USERNAME PASSWORD
+
+; 连接服务器
+connect COMMAND
+wait '$'
+
+; 结束当前ttl脚本
+end
+
+; 创建保存wsl的ip地址的临时文件
+:create_save_wsl_ip_address_temp_filepath
+    ; 随机生成0到1000的随机数
+    random tmp_file_random_num1 1000
+    random tmp_file_random_num2 1000
+
+    ; 拼接存放ip地址的文件路径
+    sprintf2 tmp_wsl_ip_address_name 'wsl_ip_address_%d_%d.txt' tmp_file_random_num1 tmp_file_random_num2
+    ; 从环境变量中获取临时文件的路径
+    getenv 'TEMP' tmp_folder_path
+    sprintf2 tmp_wsl_ip_address_full_temp_path '%s\%s' tmp_folder_path tmp_wsl_ip_address_name
+return
+
+; 获取wsl的ip地址
+:get_wsl_ip_address
+
+    ; 动态获取wsl的ip地址
+    ; 注意, 生成的纯文本不能有BOM,
+    ;       否则在读取第一行的时候, 会把BOM字符也给读进去
+    ; powershell5生成的文件, 默认自带BOM
+    ; sprintf2 get_wsl_ip_cmd 'powershell -NoProfile -Command "(wsl -d %s -e hostname -I).Trim() | Out-File -FilePath ''%s'' -Encoding utf8"' WSL_NAME tmp_wsl_ip_address_full_temp_path
+
+    ; 使用powershell7生成的文件可以使用无BOM
+    sprintf2 get_wsl_ip_cmd 'pwsh -NoProfile -Command "(wsl -d %s -e hostname -I).Trim() | Out-File -FilePath ''%s'' -Encoding utf8NoBOM"' WSL_NAME tmp_wsl_ip_address_full_temp_path
+    exec get_wsl_ip_cmd 'hide' 1
+
+    ; 指针在文件开头
+    ; 只读模式打开文件
+    fileopen wsl_ip_address_handle tmp_wsl_ip_address_full_temp_path 0 1
+
+    ; 读取文件的第一行
+    filereadln wsl_ip_address_handle line
+    HOSTADDR = line
+
+    ; 关闭文件句柄
+    fileclose wsl_ip_address_handle
+
+    ; 删除临时存放wsl的ip地址的文件
+    filedelete tmp_wsl_ip_address_full_temp_path
+
+return

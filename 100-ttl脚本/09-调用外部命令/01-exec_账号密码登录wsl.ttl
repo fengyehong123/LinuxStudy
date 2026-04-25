@@ -6,13 +6,17 @@ include './00-param.txt'
 
 ;=====================================================================
 ; 开启wsl中的ssh服务
+;   "hide"
+;       执行时隐藏窗口
 ;   1
 ;       启动中的程序执行完毕之前, 等待
 ;       程序启动完毕之后, 会把结束code保存到系统变量result中
-;   "hide"
-;       执行时隐藏窗口
 ;=====================================================================
-exec 'wsl -d Ubuntu_22.04 -- sudo service ssh start' 'hide' 1
+; exec 'wsl -d Ubuntu_22.04 -- sudo service ssh start' 'hide' 1
+
+WSL_NAME = 'Ubuntu_22.04'
+sprintf2 start_wsl_ssh "wsl -d %s -- sudo service ssh start" WSL_NAME
+exec start_wsl_ssh 'hide' 1
 
 if result != -1 then
     ; 格式化连接服务器的命令
@@ -23,3 +27,6 @@ if result != -1 then
 else
     messagebox "wsl的ssh启动失败!" '警告'
 endif
+
+; 结束当前ttl脚本
+end
