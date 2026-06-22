@@ -41,6 +41,10 @@ strconcat COMMAND USERNAME
 strconcat COMMAND ' /passwd='
 strconcat COMMAND PASSWORD
 
-; 连接服务器之后，结束当前ttl脚本
+; 连接服务器
 connect COMMAND
+; 等待提示符号的出现
+wait '$'
+
+; 结束脚本执行
 end

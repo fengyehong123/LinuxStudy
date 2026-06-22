@@ -1,0 +1,40 @@
+;=====================================================================
+; 定义连接服务器的变量参数
+HOSTADDR = '192.168.137.129'
+USERNAME = 'apluser'
+PASSWORD = 'apluser'
+;=====================================================================
+
+; 官网资料
+; https://teratermproject.github.io/manual/5/ja/macro/commandline.html
+
+; ==================================
+; 通过 ttpmacro.exe 执行.ttl脚本时
+;   paramcnt: 参数的数量
+;   param1: 当前的脚本名称
+;   param2: 第2个手动传递的参数
+; ==================================
+ttl_name = param1
+if paramcnt >= 2 then
+    op_username = param2
+endif
+
+; 格式化连接服务器的命令
+sprintf2 COMMAND "%s:22 /ssh /2 /auth=password /user=%s /passwd=%s" HOSTADDR USERNAME PASSWORD
+; 连接服务器
+connect COMMAND
+wait '$'
+
+sendln
+sendln 'echo "hello world"'
+wait '$'
+
+sendln
+sendln 'echo "当前的脚本名称为: ' ttl_name '"'
+wait '$'
+
+sendln
+sendln 'echo ' op_username
+wait '$'
+
+end

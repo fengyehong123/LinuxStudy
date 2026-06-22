@@ -18,3 +18,5 @@ sprintf2 COMMAND "%s:22 /ssh /2 /auth=password /user=%s /passwd=%s" HOSTADDR USE
 
 ; 连接服务器
 connect COMMAND
+; 等待提示符号的出现
+wait '$'
