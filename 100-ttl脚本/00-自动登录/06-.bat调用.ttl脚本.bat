@@ -8,6 +8,7 @@ set TTPMACRO="C:\Program Files\teraterm5\ttpmacro.exe"
 set MARCO="06-ttl脚本.ttl"
 set HOSTNAME=%USERNAME%
 
+:: 使用 ttpmacro.exe 调用 .ttl脚本并传递参数
 %TTPMACRO% %MARCO% %HOSTNAME%
 
 exit

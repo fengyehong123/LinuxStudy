@@ -10,7 +10,8 @@ strdim ENVARRY 2
 ENVARRY[0] = 'Ubuntu环境'
 ENVARRY[1] = 'Centos环境'
 
-listbox '请选择连接的环境' '连接环境选择' ENVARRY
+; 5.x的 TeraTerm 支持设置大小和按钮
+listbox '请选择连接的环境' '连接环境选择' ENVARRY 'listboxsize=70x10' 'minmaxbutton=on'
 if result = 0 then
     ; 定义一个能存放2个元素的字符串数组
     strdim HOSTARRAY 2
