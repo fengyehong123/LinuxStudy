@@ -1,0 +1,24 @@
+---
+- name: print_msg_1
+  hosts: "{{ target_host }}"
+  # 不需要收集主机信息
+  gather_facts: false
+
+  tasks:
+    - name: →→→ 输出消息_print_msg_1
+      debug: msg="{{ message }} 和 {{ timezone }}"
+    - name: →→→ 输出水果_print_msg_1
+      debug: msg="We want {{ item.value.amount }} {{ item.key }} !"
+      with_dict: "{{ fruits }}"
+
+- name: print_msg_2
+  hosts: "{{ target_host }}"
+  # 不需要收集主机信息
+  gather_facts: false
+
+  tasks:
+    - name: →→→ 输出消息_print_msg_2
+      debug: msg="{{ message }} 和 {{ timezone }}"
+    - name: →→→ 输出水果_print_msg_2
+      debug: msg="We want {{ item.value.amount }} {{ item.key }} !"
+      with_dict: "{{ fruits }}"

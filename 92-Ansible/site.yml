@@ -1,0 +1,106 @@
+---
+- name: "all site servers"
+  hosts: "{{ target_host }}"
+  # 不需要收集主机信息
+  gather_facts: true
+
+  # 在 .ini 中使用apluser用户进行登录, 相当于使用【sudo su - root】切换为root用户
+  become: true
+  become_method: sudo
+  become_user: root
+  vars:
+    # 使用的密码是apluser用户 sudo 时的密码, 不是root用户自己的密码
+    ansible_become_password: "{{ sudo_pass }}"
+
+  pre_tasks:
+
+    # 添加全局变量, 添加 project.yml 中定义的变量
+    - name: "include vars (Global)"
+      tags:
+        - "always"
+      # 只会执行一次, 不会针对每个远程主机重复检查同一个本地目录
+      run_once: true
+      include_vars:
+        dir: "vars"
+        depth: 1
+        extensions:
+          - "yml"
+
+    # 添加对应的环境的变量, 其中 env 变量设置在 inventory文件夹下的.ini文件中
+    - name: "include vars (Env)"
+      tags:
+        - "always"
+      run_once: true
+      include_vars:
+        dir: "vars/{{ env }}"
+        depth: 1
+        extensions:
+          - "yml"
+
+    # ======================== 1. 使用传统shell的方式进行check ========================
+    # 执行环境变量检查, 检查命令行传参时使用的 exec_env 所对应的环境变量是否存在
+    - name: "execute Env vars checking style1"
+      run_once: true
+      become: yes
+      tags:
+        - "always"
+      register: check_result
+      failed_when: check_result['rc'] != 0
+      loop:
+        - " test '{{ env }}' == '{{ exec_env }}' "
+        - " test -n '{{ pj_root_dir }}' "
+        - " test -d '{{ pj_root_dir }}' "
+      # 官方推荐写模块名, 避免未来引入第三方 Collection 时出现模块名冲突
+      ansible.builtin.shell: "{{ item }}"
+      args:
+        # 默认使用sh, 此处手动指定为 bash
+        executable: /bin/bash
+
+    # ======================== 2. 使用Ansible 模块的方式进行check ========================
+    - name: Validate execution environment
+      run_once: true
+      tags:
+        - always
+      # 使用block, 将多个子check任务聚合到一起
+      block:
+
+        - ansible.builtin.assert:
+            that:
+              # 命令行传参的变量 exec_env 是否和 .ini 文件中指定的 env 变量一致
+              - env == exec_env
+              # 变量是否为空
+              - pj_root_dir | length > 0
+              - pj_name | length > 0
+            fail_msg: "Required variables are invalid."
+
+        - ansible.builtin.stat:
+            path: "{{ pj_root_dir }}"
+          register: project_dir
+
+        - ansible.builtin.assert:
+            that:
+              - project_dir.stat.exists
+              - project_dir.stat.isdir
+            fail_msg: "Project directory '{{ pj_root_dir }}' does not exist."
+
+    # 设置组名变量
+    - name: "set current group name"
+      tags:
+        - "always"
+      set_fact:
+        # inventory_hostname 是host的别名, 是ansible的内置变量, 从host的别名中获取出当前的组名
+        # 例如从 jmo-001 中获取出 jmo
+        current_groupname: "{{ inventory_hostname | regex_replace('^([^-]+)-.*', '\\1') }}"
+    
+    # 设置机器名变量
+    - name: "set machine no"
+      tags:
+        - "always"
+      set_fact:
+        # 例如从 jmo-001 中获取出 001
+        current_machine_no: "{{ inventory_hostname | regex_replace('^[^-]+-([0-9]+)', '\\1') }}"
+
+  roles:
+    - role: nginx
+    #- role: tomcat
+    #- role: apache

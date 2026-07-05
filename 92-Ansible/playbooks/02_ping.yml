@@ -1,0 +1,9 @@
+---
+- name: Test Connection
+  hosts: "{{ target_host }}"
+  # 不需要收集主机信息
+  gather_facts: false
+
+  tasks:
+    - name: Ping Host
+      ansible.builtin.ping:

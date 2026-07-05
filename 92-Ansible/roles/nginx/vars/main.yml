@@ -1,0 +1,4 @@
+---
+# 优先级别比defaults高
+# 通常放不希望用户修改的变量
+nginx_package: nginx

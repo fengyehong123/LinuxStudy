@@ -1,0 +1,4 @@
+---
+# 默认变量, 优先级最低的变量, 可以被vars中国的变量覆盖
+nginx_port: 80
+worker_processes: auto

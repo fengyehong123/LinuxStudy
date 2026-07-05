@@ -1,0 +1,76 @@
+---
+# 设置当前的role名称
+- name: "set current role name"
+  tags:
+    - "always"
+  set_fact:
+    current_role_name: "nginx"
+
+###########################
+# 检查共通参数是否存在
+###########################
+- name: "check if custom common parameter directory exists"
+  tags:
+    - "always"
+  # 指定在ansible安装本地服务器上执行
+  delegate_to: localhost
+  # 并不需要使用root权限
+  become: false
+  # 只会执行一次, 不会针对每个远程主机重复检查同一个本地目录
+  run_once: true
+  stat:
+    path: "{{pj_root_dir}}/{{pj_name}}/roles/{{current_role_name}}/vars/{{env}}"
+  register: is_custom_common_param_exists
+
+###########################
+# 若共通参数存在的话, 则添加
+###########################
+- name: "include custom common env vars"
+  tags:
+    - "always"
+  # include_vars 只会在使用ansible的本地服务器上
+  include_vars:
+    dir: "{{pj_root_dir}}/{{pj_name}}/roles/{{current_role_name}}/vars/{{env}}"
+    depth: 1
+    # extensions要求使用list, 而不是字符串
+    extensions: 
+      - "yml"
+  when: is_custom_common_param_exists.stat.exists and is_custom_common_param_exists.stat.isdir
+
+###########################
+# 检查自定义参数是否存在
+###########################
+- name: "check if custom parameter directory exists"
+  tags:
+    - "always"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  stat:
+    path: "{{pj_root_dir}}/{{pj_name}}/roles/{{current_role_name}}/vars/{{env}}/{{current_groupname}}"
+  register: is_custom_param_exists
+
+###########################
+# 若自定义参数存在的话, 则添加
+###########################
+- name: "include custom env vars"
+  tags:
+    - "always"
+  include_vars:
+    dir: "{{pj_root_dir}}/{{pj_name}}/roles/{{current_role_name}}/vars/{{env}}/{{current_groupname}}"
+    depth: 1
+    extensions: 
+      - "yml"
+  when: is_custom_param_exists.stat.exists and is_custom_param_exists.stat.isdir
+
+###########################
+# 将子任务添加到主任务中
+###########################
+- name: "install_nginx"
+  import_tasks: ./01-install.yml
+
+- name: "config_task"
+  import_tasks: ./02-config.yml
+
+- name: "print_task"
+  import_tasks: ./03-print_msg.yml

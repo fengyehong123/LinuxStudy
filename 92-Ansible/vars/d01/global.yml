@@ -1,0 +1,19 @@
+---
+# 所有服务器所属的组
+all_server_groups:
+  - 'buo'
+  - 'jmo'
+  - 'inb'
+  - 'jmo'
+  - 'kmo'
+
+# apache中间件所属的组
+apache_server_groups:
+  - 'jmo'
+  - 'jmo'
+  - 'inb'
+
+# nginx中间件所属的组
+nginx_server_groups:
+  - 'jmo'
+  - 'oma'

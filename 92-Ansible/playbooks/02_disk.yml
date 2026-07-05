@@ -1,0 +1,14 @@
+---
+- name: Check Disk
+  hosts: "{{ target_host }}"
+  # 不需要收集主机信息
+  gather_facts: false
+
+  tasks:
+    - name: Run df
+      ansible.builtin.shell: df -h
+      register: disk_info
+
+    - name: Show Result
+      ansible.builtin.debug:
+        var: disk_info.stdout_lines

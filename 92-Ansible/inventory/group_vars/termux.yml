@@ -1,0 +1,9 @@
+message: "Hello termux !"
+
+fruits:
+  apples:
+    amount: 100
+  bananas:
+    amount: 200
+  oranges:
+    amount: 300

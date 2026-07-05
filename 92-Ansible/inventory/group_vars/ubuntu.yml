@@ -1,0 +1,9 @@
+message: "Hello ubuntu !"
+
+fruits:
+  apples:
+    amount: 10
+  bananas:
+    amount: 20
+  oranges:
+    amount: 30

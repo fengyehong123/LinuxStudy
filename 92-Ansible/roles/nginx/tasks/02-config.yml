@@ -1,0 +1,28 @@
+---
+# task1
+- name: "copy file"
+  tags:
+    "copy_file"
+  # 只是复制文件的话, 不需要提权
+  become: false
+  # 官方推荐写模块名, 避免未来引入第三方 Collection 时出现模块名冲突
+  ansible.builtin.shell: cp "/home/apluser/start_ssh_service.sh" "/home/apluser/project/"
+  when: >
+    current_groupname in nginx_server_groups
+
+# task2
+- name: deploy config
+  tags:
+    - "nginx_config"
+  template:
+    # 模板文件
+    src: nginx.conf.j2
+    # 复制到的目标路径
+    dest: /home/apluser/project/nginx/nginx.conf
+    backup: yes
+    owner: root
+    group: root
+    mode: "0755"
+  # 只有满足当前条件的时候才能进行复制
+  when: >
+    current_groupname in nginx_server_groups

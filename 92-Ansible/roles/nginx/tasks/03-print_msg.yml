@@ -1,0 +1,3 @@
+- name: 输出 {{ inventory_hostname }} 的消息
+  # 其中 ansible_host 是ansible内置的变量
+  debug: msg="{{ ansible_host }} 和 {{ env }} 和 {{ pj_name }} 和 {{ current_groupname }} 和 {{ current_machine_no }} 和 {{ current_role_name }}"

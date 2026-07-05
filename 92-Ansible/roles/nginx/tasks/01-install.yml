@@ -1,0 +1,15 @@
+---
+- name: "install nginx"
+  tags:
+    "Install"
+  # ===============================================================
+  # ansible.builtin.apt 是幂等模块，它会先检查软件包是否已经安装：
+  # 已安装 → 什么都不做(changed: false)
+  # 未安装 → 自动安装(changed: true)
+  # ===============================================================
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+  when: >
+    current_groupname in nginx_server_groups

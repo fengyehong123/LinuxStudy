@@ -1,0 +1,13 @@
+---
+- name: Uninstall nginx
+  hosts: "{{ target_host }}"
+  become: true
+  become_method: sudo
+  become_user: root
+
+  tasks:
+    - name: Remove nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: absent
+        purge: true

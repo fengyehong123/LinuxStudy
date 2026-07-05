@@ -1,0 +1,11 @@
+---
+- name: Copy File
+  hosts: "{{ target_host }}"
+  # 不需要收集主机信息
+  gather_facts: false
+
+  tasks:
+    - name: Copy test.txt
+      ansible.builtin.copy:
+        src: test.txt
+        dest: /tmp/test.txt

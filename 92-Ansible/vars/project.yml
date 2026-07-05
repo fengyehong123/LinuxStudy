@@ -1,0 +1,5 @@
+---
+# 项目所在的文件夹
+pj_root_dir: /home/apluser
+# 项目的文件夹名称
+pj_name: ansible_work
