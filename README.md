@@ -1,2 +1,2 @@
-# BasStudy
-Bash脚本学习
+# LinuxStudy
+Linux学习
