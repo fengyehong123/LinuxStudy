@@ -79,6 +79,9 @@ ansible ubuntu -i ./inventory/hosts.ini -m shell -a "df -h && hostname" --ssh-ex
 # 查看 hosts.ini 的详细信息
 ansible-inventory -i ./inventory/hosts.ini --list
 
+# 以结构化的方式显示出受管主机的信息
+ansible-inventory --graph
+
 # 查看默认的配置项
 ansible-config dump
 # 查看被修改的配置项
@@ -106,6 +109,7 @@ ansible-playbook -i ./inventory/hosts.ini ./playbooks/02_disk.yml -e target_host
 | `-v`             | 详细输出       
 | `-vvv`           | 调试模式       
 | `--syntax-check` | 检查 YAML 语法 
+
 ```bash
 # -i → --inventory 
 #      --inventory-file
