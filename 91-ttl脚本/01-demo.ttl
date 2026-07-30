@@ -19,7 +19,9 @@ if result then
     ; 发送命令到控制台去执行
     sendln 'sleep 3'
     ; 等待控制台上显示下面的字符（返回下面的字符表示当前的命令执行结束）
-    waitln '$' '#'
+    ; 此处需要使用 wait 而不是 waitln
+    ; 因为 $ 和 # 本身就是控制台的一部分
+    wait '$' '#'
 
     sendln 'echo 休眠完毕。。。'
     wait '$' '#'
